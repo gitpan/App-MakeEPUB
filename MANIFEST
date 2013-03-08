@@ -1,0 +1,15 @@
+bin/make-epub
+Build.PL
+Changes
+lib/App/MakeEPUB.pm
+Makefile.PL
+MANIFEST
+MANIFEST.SKIP
+META.json
+META.yml
+README
+t/00.load.t
+t/perlcritic.t
+t/pod-coverage.t
+t/pod.t
+t/script-make-epub.t
