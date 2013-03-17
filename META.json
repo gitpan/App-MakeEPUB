@@ -32,6 +32,7 @@
             "File::Find" : 0,
             "File::Path" : 0,
             "File::Spec" : 0,
+            "HTML::TreeBuilder" : 0,
             "perl" : "v5.10.1",
             "version" : 0
          }
@@ -40,7 +41,7 @@
    "provides" : {
       "App::MakeEPUB" : {
          "file" : "lib/App/MakeEPUB.pm",
-         "version" : "v0.1.1"
+         "version" : "v0.2.0"
       }
    },
    "release_status" : "stable",
@@ -49,5 +50,5 @@
          "http://dev.perl.org/licenses/"
       ]
    },
-   "version" : "v0.1.1"
+   "version" : "v0.2.0"
 }

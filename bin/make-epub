@@ -31,6 +31,7 @@ GetOptions( \%opt,
     'publisher=s',
     'rights=s',
     'spine=s',
+    'tocdepth=i',
     'title=s',
     'output=s',
     'help|?', 'manual')
@@ -117,7 +118,7 @@ Set the I<dc:title> for the metadata.
 
 =item B<< -spine order >>
 
-This Option determines the order of the HTML pages in the EPUB. The argument
+This option determines the order of the HTML pages in the EPUB. The argument
 for this options is a comma separated list of basenames (without ending) of
 the HTML files in the EPUB book.
 
@@ -125,6 +126,19 @@ For instance if you have two HTML files with path I<OEBPS/part1.html> and
 I<OEBPS/part2.html> you would give option C<-spine> like this:
 
  make-epub-content-opf -spine=part1,part2 ...
+
+=item B<< -tocdepth level >>
+
+This option allows to set the maximum level of the table of contents.
+
+The default is 1, maximum is 2.
+
+Level 1 is taken from the C<< <title> >> tag of each HTML file in the ebook.
+
+At the moment level 2 works only with HTML RFCs that have their headings
+organized like C<< <span class="h2"><a id="some-id">...</span> >>. The attr
+I<id> from the C<< <a> >> tag is taken as url extension into the file and the
+text inside the C<< <span> >> tags is taken as label.
 
 =back
 

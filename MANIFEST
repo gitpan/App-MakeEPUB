@@ -1,6 +1,10 @@
 bin/make-epub
 Build.PL
 Changes
+examples/rfc/bin/finish-htmlrfc.pl
+examples/rfc/clean/rfc2328.html
+examples/rfc/download/rfc2328.html
+examples/rfc/README.pod
 lib/App/MakeEPUB.pm
 Makefile.PL
 MANIFEST
@@ -13,3 +17,4 @@ t/perlcritic.t
 t/pod-coverage.t
 t/pod.t
 t/script-make-epub.t
+t/toc_ncf.t

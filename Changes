@@ -1,5 +1,11 @@
 Revision history for App-MakeEPUB
 
+0.2.0 Sun Mar 17 18:55:21 CET 2013
+	- use HTML::TreeBuilder to look for items for the table of contents
+	- option -tocdepth in bin/make-epub to allow table of contents with to
+	  levels
+	- added example how to generate EPUBs from RFCs
+
 0.1.1 Fri Mar  8 10:34:08 CET 2013
 	- option to change the name of the output file
 

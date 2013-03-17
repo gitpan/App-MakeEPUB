@@ -1,0 +1,45 @@
+=head1 How to create an EPUB ebook from RFCs
+
+There are three steps to create an EPUB ebook from an RFC.
+
+=over 4
+
+=item 1.
+
+Download the RFC from https://tools.ietf.org/html/
+
+    wget https://tools.ietf.org/html/rfc2328 > download/rfc2328.html
+
+=item 2.
+
+Since the HTML RFCs from https://tools.ietf.org/html/ are not directly
+suitable for use in an EPUB, clean up the HTML file with this script in the
+directory I<< examples/rfc >>.
+
+    bin/finish-htmlrfc.pl download/rfc2328.html > clean/rfc2328.html
+
+=item 3.
+
+Make the EPUB.
+
+    make-epub -publisher IETF \
+              -rights 'The Internet Society' \
+	      -title RFC2328 \
+              -spine rfc2328 \
+	      -tocdepth 2 \
+	      -output rfc2328.epub \
+	      clean
+
+=back
+
+=head2 Check your EPUB ebook
+
+If you happen to have installed epubcheck you can verify the EPUB
+
+    epubcheck rfc2328.epub
+
+If there are any problems with the HTML in the ebook,
+try to repair them by adjusting the script I<< bin/finish-htmlrfc.pl >>.
+
+If there are any problem with the rest of the EPUB please file a bug at
+L<rt.pan.org|https://rt.cpan.org/Public/Dist/Display.html?Name=App-MakeEPUB>.

@@ -28,8 +28,17 @@ Alternatively, to install with Module::Build, you can use the following commands
 
 DEPENDENCIES
 
-None.
+	HTML::TreeBuilder
 
+HISTORY
+
+This module started as a script to generate an EPUB ebook from the LaTeX
+sources of the german magazine UpTimes (http://www.guug.de/uptimes/). The
+script just does the last part of the task: taking the HTML, CSS and image
+files below a directory and make an ebook thereof. Later I decided to put it
+to more general use and adapted the script to generate EPUB ebooks from the
+HTML RFCs at https://tools.ietf.org/html/ (see exampls directory on how to do
+this).
 
 COPYRIGHT AND LICENCE
 

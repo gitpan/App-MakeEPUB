@@ -8,8 +8,9 @@ use Carp;
 use File::Basename;
 use File::Find;
 use File::Path qw(make_path);
+use HTML::TreeBuilder;
 
-use version; our $VERSION = qv('0.1.1');
+use version; our $VERSION = qv('0.2.0');
 
 my %guidetitle = (
     cover   => 'Cover',
@@ -65,6 +66,13 @@ sub new {
 
     $self = bless {}, $type;
     $self->{path} = {};
+    #
+    # the following navPoint description is suitable for HTML RFCs
+    #
+    $self->{nav_l2} = {
+        '_tag'  => 'span',
+        'class' => 'h2',
+    };
 
     $self->_init($args)                 if (defined $args);
 
@@ -231,31 +239,45 @@ sub _generate_tocncx_navPoint {
     my ($self, $path, $depth, $id) = @_;
     my $epubdir = $self->{epubdir};
 
-    die "Can't do tocdepth > 1 at the moment." if (1 < $depth);
-    my @navPoint = ();
-    if (open my $in, '<', "$epubdir/$path") {
-        while (<$in>) {
-            #
-            # This is a shortcut. I take the TOC text from the HTML title.
-            #
-            if (m|^\s*<title>(.*)</title>\s*$|i) {
-                push @navPoint,
-                     qq(  <navPoint id="navPoint-$id" playOrder="$id">),
-                      q(   <navLabel>),
-                     qq(    <text>$1</text>),
-                      q(   </navLabel>),
-                     qq(   <content src="$path" />),
-                      q(  </navPoint>);
-                $id++;
-                last if (1 == $depth);
-            }
+    die "Can't do tocdepth > 1 at the moment." if (2 < $depth);
+    my $tree = HTML::TreeBuilder->new();
+
+    $tree->parse_file("$epubdir/$path");
+
+    my $tt = $tree->look_down('_tag' => 'title');
+    my $title = $tt->as_text();
+    my $extra = '';
+    my $l1id  = $id;
+    my $args  = { };
+    my $cnt;
+    
+    if (2 == $depth) {
+        my @l2s = $tree->look_down(%{$self->{nav_l2}});
+        my $nps = [];
+
+        foreach my $l2 (@l2s) {
+            my $text = $l2->as_text();
+            my $a    = $l2->look_down('_tag' => 'a', 'id' => qr//);
+            my $id   = $a->attr('id');
+            push @$nps, [ $path, $id, $text ];
         }
-        close $in;
+        $args->{counter} = $id + 1;
+        $args->{array}   = $nps;
+        $args->{indent}  = '    ';
+        $extra = _tocncf_navPoints_from_array($args);
+        $cnt   = $args->{counter};
     }
     else {
-        die "generate_tocncx_navPoint: can't open file '$path': $!";
+        $cnt   = $id + 1;
     }
-    return ($id, join "\n", @navPoint);
+
+    $args->{counter} = $id;
+    $args->{array}   = [ [ $path, '', $title, $extra ], ];
+    $args->{indent}  = '  ';
+
+    my $navPoints = _tocncf_navPoints_from_array($args);
+
+    return ($cnt, $navPoints);
 } # _generate_tocncx_navPoint()
 
 sub _init {
@@ -344,6 +366,46 @@ sub _substitute_template {
     }
     return $out;
 } # _substitute_template()
+
+# Functions not bound to an object.
+# ---------------------------------
+
+# _tocncf_navPoints_from_array( {
+#     counter => $cnt,
+#     array   => $array,
+#     indent  => "  ",
+#     } )
+#
+# Returns a string containing <navPoint> entries for the <navMap> in toc.ncf
+# from the given array. The first id is named "navPoint-$cnt" and the first
+# playOrder "$cnt". $cnt is updated to the next number after the last
+# playOrder.
+#
+# The array should be of the form [ [ $fname, $anchor, $text, $extra ], ... ],
+# where $fname is the name of the file, $anchor the id of an html anchor
+# (<a id="$anchor" ...>) and $text the text belonging to the anchor. The
+# fourth field ($extra) is optional and can be used for next level navPoints.
+#
+sub _tocncf_navPoints_from_array {
+    my ($args) = @_;
+    my @anchors = @{$args->{array}};
+    my $indent = $args->{indent} || "";
+
+    my $np = sub {
+        my $count = $args->{counter}++;
+        my $href  = ($_[0]->[1]) ? $_[0]->[0] . "#" . $_[0]->[1] : $_[0]->[0];
+        my $label = $_[0]->[2];
+        my $extra = $_[0]->[3] || '';
+        return << "EONAVPOINT";
+$indent<navPoint id="navpoint-$count" playOrder="$count">
+$indent  <navLabel><text>$label</text></navLabel>
+$indent  <content src="$href" />
+$extra$indent</navPoint>
+EONAVPOINT
+    };
+
+    my $navPoints = join("", map { $np->($_) } @anchors);
+} # _tocncf_navPoints_from_array()
 
 1; # Magic true value required at end of module
 __END__
