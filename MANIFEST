@@ -2,8 +2,7 @@ bin/make-epub
 Build.PL
 Changes
 examples/rfc/bin/finish-htmlrfc.pl
-examples/rfc/clean/rfc2328.html
-examples/rfc/download/rfc2328.html
+examples/rfc/bin/rfc2xhtml.pl
 examples/rfc/README.pod
 lib/App/MakeEPUB.pm
 Makefile.PL

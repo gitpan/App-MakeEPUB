@@ -10,7 +10,7 @@ use File::Find;
 use File::Path qw(make_path);
 use HTML::TreeBuilder;
 
-use version; our $VERSION = qv('0.2.0');
+use version; our $VERSION = qv('0.3.0');
 
 my %guidetitle = (
     cover   => 'Cover',
@@ -66,8 +66,6 @@ sub new {
 
     $self = bless {}, $type;
     $self->{path} = {};
-    #
-    # the following navPoint description is suitable for HTML RFCs
     #
     $self->{nav_l2} = {
         '_tag'  => 'span',
@@ -257,9 +255,10 @@ sub _generate_tocncx_navPoint {
 
         foreach my $l2 (@l2s) {
             my $text = $l2->as_text();
-            my $a    = $l2->look_down('_tag' => 'a', 'id' => qr//);
-            my $id   = $a->attr('id');
-            push @$nps, [ $path, $id, $text ];
+            if (my $a = $l2->look_down('_tag' => 'a', 'id' => qr//)) {
+                my $id   = $a->attr('id');
+                push @$nps, [ $path, $id, $text ];
+            }
         }
         $args->{counter} = $id + 1;
         $args->{array}   = $nps;
@@ -286,8 +285,16 @@ sub _init {
     die "need argument 'epubdir'"       unless (defined $args->{epubdir});
     $self->{epubdir} = $args->{epubdir};
     $self->{epubdir} =~ s|/$||;
-    die "need argument 'spine_order'"   unless (defined $args->{spine_order});
     $self->{spine_order} = $args->{spine_order};
+    if ($args->{level2}) {
+        #
+        # $args->{level2} comes as 'attr1:val1,attr2:val2,...' and goes into
+        # $self->{nav_l2} as { attr1 => val1, attr2 => val2, ... }
+        #
+        my @attrs = split(/,/, $args->{level2});
+        my %nav_l2 = map { my @p = split(/:/, $_, 2); $p[0] => $p[1] } @attrs;
+        $self->{nav_l2} = \%nav_l2;
+    }
 
     $self->_scan_directory();
     $self->_spine_order();
@@ -330,7 +337,12 @@ sub _spine_order {
         $si =~ s|^.+/([^/]+)$|$1|;
         $o2p{$si} = $path;
     }
-    @spo =  map { $o2p{$_} } split /,/, $order;
+    if ($order) {
+        @spo = map { $o2p{$_} } split /,/, $order;
+    }
+    else {
+        @spo = map { $o2p{$_} } sort keys %o2p;
+    }
     $self->{spine_order} = \@spo;
     return @spo;
 } # _spine_order()
@@ -455,6 +467,7 @@ format.
 
     my $epub = App::MakeEPUB->new( {
         epubdir     => $epubdir,
+        level2      => $level2,
         spine_order => $spine_order,
     } );
 
@@ -464,7 +477,32 @@ The named argument I<epubdir> is the path to the directory containing the
 files for the ebook.
 
 The named argument I<spine_order> takes a string containing the names of the
-XHTML files in spine order as a comma separated list.
+XHTML files in spine order as a comma separated list. If it is missing the
+names are sorted by alphabet.
+
+The named argument I<level2> takes a string containing instructions for
+HTML::Element->look_down() on how to find the text and id for the level 2
+navPoints in the file I<toc.ncf>. It takes the für 'attr1:val1,attr2:val2,...'
+which will be translated into
+
+  HTML::Element->look_down( { attr1 =>  val1, attr2 => val2, ... } );
+
+The content for the navPoint is taken from the first C<< <a> >> tag inside
+each HTML::Element found by I<look_down()> and containing an attribute I<id>.
+The text for the navPoint is taken from the whole text inside each
+HTML::Element.
+
+If the argument I<level2> is missing, a '_tag:span,class:h2' is taken. This
+will take the navPoints from all spans looking roughly like
+
+  <span class="h2"><a id="navid">some text</a></span>
+
+and translates them to something like
+
+  <navPoint id="navpoint-id" playOrder="order">
+    <navLabel><text>some text</text></navLabel>
+    <content src="filename#navid" />
+  </navPoint>
 
 =head2 add_metadata()
 

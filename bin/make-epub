@@ -28,6 +28,7 @@ GetOptions( \%opt,
     'creator=s',
     'identifier=s',
     'language=s',
+    'level2=s',
     'publisher=s',
     'rights=s',
     'spine=s',
@@ -45,6 +46,7 @@ my $epubdir = shift;
 pod2usage(-exitval => 1, -verbose => 1, -input => \*DATA) unless ($epubdir);
 
 my $epub = App::MakeEPUB->new({ epubdir     => $epubdir,
+                                level2      => $opt{level2},
                                 spine_order => $opt{spine},
                               });
 
@@ -101,6 +103,28 @@ Set the I<dc:identifier> for the metadata.
 =item B<< -language >>
 
 Set the I<dc:language> for the metadata. Defaults to I<en>.
+
+=item B<< -level2 >>
+
+This option takes a string containing instructions on how to find the text
+and id for the level 2 navPoints in the file I<toc.ncf>.
+
+The content for the navPoint is taken from the first C<< <a> >> tag inside
+each HTML element found containing an attribute I<id>.
+The text for the navPoint is taken from the whole text inside each
+HTML element.
+
+If the argument I<level2> is missing, '_tag:span,class:h2' is taken as default.
+This will take the navPoints from all spans looking roughly like
+
+  <span class="h2"><a id="navid">some text</a></span>
+
+and translates them into something like
+
+  <navPoint id="navpoint-id" playOrder="order">
+    <navLabel><text>some text</text></navLabel>
+    <content src="filename#navid" />
+  </navPoint>
 
 =item B<< -publisher name_of_publisher >>
 

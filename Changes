@@ -1,5 +1,11 @@
 Revision history for App-MakeEPUB
 
+0.3.0 Sat Mar 30 16:24:12 CET 2013
+	- automatically sort html files for toc.ncf and spine if option
+	  --spine was not given
+	- change the pattern for level 2 navigation in toc.ncf with option
+	  --level2
+
 0.2.0 Sun Mar 17 18:55:21 CET 2013
 	- use HTML::TreeBuilder to look for items for the table of contents
 	- option -tocdepth in bin/make-epub to allow table of contents with to
