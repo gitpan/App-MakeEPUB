@@ -10,7 +10,7 @@ use File::Find;
 use File::Path qw(make_path);
 use HTML::TreeBuilder;
 
-use version; our $VERSION = qv('0.3.0');
+use version; our $VERSION = qv('0.3.1');
 
 my %guidetitle = (
     cover   => 'Cover',
@@ -482,17 +482,17 @@ names are sorted by alphabet.
 
 The named argument I<level2> takes a string containing instructions for
 HTML::Element->look_down() on how to find the text and id for the level 2
-navPoints in the file I<toc.ncf>. It takes the für 'attr1:val1,attr2:val2,...'
-which will be translated into
+navPoints in the file I<toc.ncf>. It takes a string like
+'attr1:val1,attr2:val2,...' and translates it into
 
   HTML::Element->look_down( { attr1 =>  val1, attr2 => val2, ... } );
 
 The content for the navPoint is taken from the first C<< <a> >> tag inside
 each HTML::Element found by I<look_down()> and containing an attribute I<id>.
 The text for the navPoint is taken from the whole text inside each
-HTML::Element.
+HTML::Element found.
 
-If the argument I<level2> is missing, a '_tag:span,class:h2' is taken. This
+If the argument I<level2> is missing, '_tag:span,class:h2' is taken. This
 will take the navPoints from all spans looking roughly like
 
   <span class="h2"><a id="navid">some text</a></span>

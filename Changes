@@ -1,5 +1,8 @@
 Revision history for App-MakeEPUB
 
+0.3.1 Mon Apr  1 09:11:37 CEST 2013
+	- repaired some character set issues in the POD
+
 0.3.0 Sat Mar 30 16:24:12 CET 2013
 	- automatically sort html files for toc.ncf and spine if option
 	  --spine was not given
